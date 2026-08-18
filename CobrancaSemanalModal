@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <base target="_top">
+    <style>
+      body { font-family: Arial, sans-serif; padding: 15px; color: #333; }
+      .field { margin-bottom: 12px; }
+      label { display: block; font-weight: bold; margin-bottom: 4px; font-size: 13px; }
+      input, select, textarea { width: 100%; padding: 8px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; }
+      .btn-container { text-align: right; margin-top: 15px; }
+      button { background-color: #1b5e20; color: white; border: none; padding: 9px 15px; font-weight: bold; border-radius: 4px; cursor: pointer; }
+      button:hover { background-color: #144417; }
+      #resultadoArea { display: none; margin-top: 15px; }
+      #loading { display: none; margin-top: 10px; font-size: 12px; color: #666; font-style: italic; }
+    </style>
+  </head>
+  <body>
+    <h3>📲 Cobrança Individual</h3>
+    
+    <div id="formArea">
+      <div class="field">
+        <label for="influenciador">Influenciador (@ ou Nome):</label>
+        <input type="text" id="influenciador" placeholder="Ex: @nome.perfil">
+      </div>
+      <div class="field">
+        <label for="dataInicio">Data Inicial:</label>
+        <input type="date" id="dataInicio">
+      </div>
+      <div class="field">
+        <label for="dataFim">Data Final:</label>
+        <input type="date" id="dataFim">
+      </div>
+      <div id="loading">Calculando entregas e gerando texto...</div>
+      <div class="btn-container">
+        <button onclick="gerarTexto()">Gerar Mensagem</button>
+      </div>
+    </div>
+
+    <div id="resultadoArea">
+      <label for="mensagemTexto">Texto Copiável para WhatsApp:</label>
+      <textarea id="mensagemTexto" rows="8" readonly onclick="this.select()"></textarea>
+      <div class="btn-container">
+        <button onclick="copiarEFechar()">Copiar e Fechar</button>
+      </div>
+    </div>
+
+    <script>
+      function gerarTexto() {
+        const inf = document.getElementById('influenciador').value;
+        const inicio = document.getElementById('dataInicio').value;
+        const fim = document.getElementById('dataFim').value;
+
+        if (!inf || !inicio || !fim) {
+          alert('Por favor, preencha o influenciador e o período de datas.');
+          return;
+        }
+
+        document.getElementById('loading').style.display = 'block';
+
+        google.script.run
+          .withSuccessHandler((textoGerado) => {
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('formArea').style.display = 'none';
+            document.getElementById('resultadoArea').style.display = 'block';
+            document.getElementById('mensagemTexto').value = textoGerado;
+          })
+          .withFailureHandler((err) => {
+            alert('Erro: ' + err.message);
+            document.getElementById('loading').style.display = 'none';
+          })
+          .calcularEGerarCobrancaIndividual(inf, inicio, fim);
+      }
+
+      function copiarEFechar() {
+        const copyText = document.getElementById("mensagemTexto");
+        copyText.select();
+        document.execCommand("copy");
+        google.script.host.close();
+      }
+    </script>
+  </body>
+</html>
