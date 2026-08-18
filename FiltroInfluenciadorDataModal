@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <base target="_top">
+    <style>
+      body { font-family: Arial, sans-serif; padding: 15px; color: #333; }
+      .field { margin-bottom: 12px; }
+      label { display: block; font-weight: bold; margin-bottom: 4px; font-size: 13px; }
+      input { width: 100%; padding: 8px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; }
+      .btn-container { text-align: right; margin-top: 18px; }
+      button { background-color: #1b5e20; color: white; border: none; padding: 10px 16px; font-weight: bold; border-radius: 4px; cursor: pointer; }
+      button:hover { background-color: #144417; }
+      #loading { display: none; margin-top: 8px; font-size: 12px; color: #666; font-style: italic; }
+    </style>
+  </head>
+  <body>
+    <h3>👤 Consultar Perfil por Data</h3>
+    <div class="field">
+      <label for="influenciador">Influenciador (@ ou Nome):</label>
+      <input type="text" id="influenciador" placeholder="Ex: @nome.perfil">
+    </div>
+    <div class="field">
+      <label for="dataInicio">Data Inicial:</label>
+      <input type="date" id="dataInicio">
+    </div>
+    <div class="field">
+      <label for="dataFim">Data Final:</label>
+      <input type="date" id="dataFim">
+    </div>
+    <div id="loading">Buscando dados... aguarde.</div>
+    <div class="btn-container">
+      <button onclick="buscar()">Consultar</button>
+    </div>
+
+    <script>
+      function buscar() {
+        const inf = document.getElementById('influenciador').value;
+        const inicio = document.getElementById('dataInicio').value;
+        const fim = document.getElementById('dataFim').value;
+        
+        if (!inf || !inicio || !fim) {
+          alert('Por favor, preencha o influenciador e o período de datas completo.');
+          return;
+        }
+
+        document.getElementById('loading').style.display = 'block';
+
+        google.script.run
+          .withSuccessHandler(() => {
+            google.script.host.close();
+          })
+          .withFailureHandler((err) => {
+            alert('Erro: ' + err.message);
+            document.getElementById('loading').style.display = 'none';
+          })
+          .executarConsultaInfluenciadorPorData(inf, inicio, fim);
+      }
+    </script>
+  </body>
+</html>
