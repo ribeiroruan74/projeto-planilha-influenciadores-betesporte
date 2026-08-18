@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <meta charset="utf-8">
+  <style>
+    :root {
+      --bg-main: #0f172a;
+      --card-bg: #1e293b;
+      --card-border: #334155;
+      --accent-blue: #3b82f6;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --status-green: #10b981;
+      --status-red: #ef4444;
+      --status-yellow: #f59e0b;
+      --status-purple: #8b5cf6;
+      --status-feed: #a855f7;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    body { background-color: var(--bg-main); color: var(--text-main); padding: 10px; display: flex; flex-direction: column; gap: 10px; width: 100%; overflow-x: hidden; }
+
+    #loader {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(4px);
+      display: none; justify-content: center; align-items: center; z-index: 999; flex-direction: column; gap: 8px;
+    }
+    .spinner { width: 36px; height: 36px; border: 3px solid var(--card-border); border-top-color: var(--accent-blue); border-radius: 50%; animation: spin 0.8s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .card { background-color: var(--card-bg); border: 1px solid var(--card-border); border-radius: 10px; padding: 12px; display: flex; flex-direction: column; gap: 10px; }
+    .inf-card { text-align: center; padding: 14px 10px; background: linear-gradient(180deg, #1e293b 0%, #172033 100%); }
+    .inf-nome { font-size: 17px; font-weight: 800; color: var(--text-main); margin-bottom: 4px; word-break: break-word; }
+    .inf-username { font-size: 13px; color: var(--accent-blue); font-weight: 600; margin-bottom: 10px; word-break: break-word; }
+
+    .btn-insta {
+      display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+      background: rgba(59, 130, 246, 0.15); color: var(--accent-blue); border: 1px solid var(--accent-blue);
+      padding: 8px 14px; border-radius: 8px; text-decoration: none; font-weight: 700; font-size: 13px;
+    }
+
+    .status-badge {
+      margin-top: 8px; padding: 6px 10px; border-radius: 6px; font-size: 12px; font-weight: 700;
+      border: 1px solid var(--card-border); background: #0f172a; display: inline-block; word-break: break-word;
+    }
+
+    .nav-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .btn-nav { background-color: var(--card-bg); border: 1px solid var(--card-border); color: var(--text-main); padding: 10px 4px; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer; }
+    .btn-nav:hover { background-color: #334155; }
+    
+    .btn-carregar-sel { grid-column: span 2; background-color: rgba(59, 130, 246, 0.2); border-color: var(--accent-blue); color: #60a5fa; }
+    .btn-carregar-sel:hover { background-color: var(--accent-blue); color: #fff; }
+
+    .btn-pendente { grid-column: span 2; background-color: rgba(245, 158, 11, 0.15); border-color: var(--status-yellow); color: var(--status-yellow); }
+
+    .section-title { font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+    .status-actions-grid { display: flex; flex-direction: column; gap: 8px; }
+    .btn-status { width: 100%; padding: 12px 8px; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer; border: none; display: flex; align-items: center; justify-content: center; gap: 6px; color: white; }
+
+    .btn-story-link { background: linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%); }
+    .btn-story-nolink { background: linear-gradient(135deg, #10b981 0%, #059669 100%); }
+    .btn-branding { background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); }
+    .btn-feed { background: linear-gradient(135deg, #a855f7 0%, #7e22ce 100%); }
+    .btn-nao-postou { background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); }
+
+    .search-box { display: flex; gap: 6px; width: 100%; }
+    .input-busca { flex: 1; min-width: 0; background: #0f172a; border: 1px solid var(--card-border); padding: 10px; border-radius: 8px; color: white; font-size: 13px; outline: none; }
+    .btn-busca { background: var(--accent-blue); color: white; border: none; padding: 0 14px; border-radius: 8px; font-weight: 700; cursor: pointer; font-size: 13px; flex-shrink: 0; }
+  </style>
+</head>
+<body>
+
+  <div id="loader">
+    <div class="spinner"></div>
+    <span style="font-weight: 600; font-size: 13px; color: var(--text-muted);">Processando...</span>
+  </div>
+
+  <!-- Influenciador Ativo -->
+  <div class="card inf-card">
+    <h2 class="inf-nome" id="infNome">Carregando...</h2>
+    <div class="inf-username" id="infUsername">@username</div>
+    
+    <div>
+      <a href="#" id="btnInsta" target="_blank" class="btn-insta">🔗 Abrir Instagram</a>
+    </div>
+
+    <div>
+      <div class="status-badge" id="infStatus">Status: --</div>
+    </div>
+  </div>
+
+  <!-- Navegação + Botão Carregar Selecionada -->
+  <div class="nav-grid">
+    <button class="btn-nav btn-carregar-sel" onclick="carregarLinhaSelecionada()">📍 Carregar Linha Selecionada</button>
+    <button class="btn-nav" onclick="navegar(-1)">⬅️ Anterior</button>
+    <button class="btn-nav" onclick="navegar(1)">Próximo ➡️</button>
+    <button class="btn-nav btn-pendente" onclick="buscarPendente()">⏳ Ir para Próximo Pendente</button>
+  </div>
+
+  <!-- Status -->
+  <div class="card">
+    <span class="section-title">REGISTRAR STATUS (COLUNA D)</span>
+    <div class="status-actions-grid">
+      <button class="btn-status btn-story-link" onclick="selecionarStatus('Story + Link')">Story + Link</button>
+      <button class="btn-status btn-story-nolink" onclick="selecionarStatus('Story Sem Link')">Story Sem Link</button>
+      <button class="btn-status btn-branding" onclick="selecionarStatus('Branding')">Branding</button>
+      <button class="btn-status btn-feed" onclick="selecionarStatus('Feed')">Feed / Reels</button>
+      <button class="btn-status btn-nao-postou" onclick="selecionarStatus('Não Postou')">Não Postou</button>
+    </div>
+  </div>
+
+  <!-- Busca -->
+  <div class="card">
+    <span class="section-title">BUSCAR INFLUENCIADOR</span>
+    <div class="search-box">
+      <input type="text" id="inpBusca" class="input-busca" placeholder="Nome ou @username..." onkeypress="tratarKeyPress(event)">
+      <button class="btn-busca" onclick="executarBusca()">OK</button>
+    </div>
+  </div>
+
+  <script>
+    function gerarRelatorioGeral() {
+  mostrarLoading(true);
+  google.script.run.withSuccessHandler(function(textoRelatorio) {
+    mostrarLoading(false);
+    // Exibe o relatório em um alerta ou copia para a área de transferência
+    alert(textoRelatorio);
+  }).gerarRelatorioDiarioGeral();
+}
+    let linhaAtual = 3;
+    let temporizadorAvanco = null;
+    let statusPendenteArray = [];
+
+    window.onload = function() {
+      carregarLinhaSelecionada();
+    };
+
+    function mostrarLoading(flag) {
+      document.getElementById('loader').style.display = flag ? 'flex' : 'none';
+    }
+
+    function carregarLinhaSelecionada() {
+      limparTemporizador();
+      mostrarLoading(true);
+      google.script.run.withSuccessHandler(function(dados) {
+        exibirDadosInfluenciador(dados);
+        mostrarLoading(false);
+      }).obterLinhaSelecionada();
+    }
+
+    function limparTemporizador() {
+      if (temporizadorAvanco) {
+        clearTimeout(temporizadorAvanco);
+        temporizadorAvanco = null;
+      }
+    }
+
+    function selecionarStatus(statusTexto) {
+      limparTemporizador();
+
+      if (!statusPendenteArray.includes(statusTexto)) {
+        statusPendenteArray.push(statusTexto);
+      }
+
+      // Atualiza o texto na tela no exato instante do clique
+      const statusBadge = document.getElementById('infStatus');
+      statusBadge.innerText = "Status: " + statusPendenteArray.join(" / ");
+
+      // Agenda o salvamento silencioso e avanço automático em 1.2 segundos
+      temporizadorAvanco = setTimeout(function() {
+        processarEmSegundoPlano();
+      }, 1200);
+    }
+
+    function processarEmSegundoPlano() {
+      if (statusPendenteArray.length === 0) return;
+
+      const linhaParaGravar = linhaAtual;
+      const statusParaGravar = [...statusPendenteArray];
+      
+      // Reseta os status pendentes para o próximo
+      statusPendenteArray = [];
+
+      // Passa a tela para o próximo influenciador instantaneamente via UI
+      navegarSilencioso(1);
+
+      // Envia a gravação para o Google Sheets em segundo plano (sem travar a tela)
+      google.script.run.salvarEAvancarConjunto(statusParaGravar, linhaParaGravar);
+    }
+
+    function navegarSilencioso(direcao) {
+      google.script.run.withSuccessHandler(function(dados) {
+        exibirDadosInfluenciador(dados);
+      }).navegarParaLinha(linhaAtual, direcao);
+    }
+
+    function exibirDadosInfluenciador(dados) {
+      if (!dados) return;
+      linhaAtual = dados.linha;
+      statusPendenteArray = [];
+      document.getElementById('infNome').innerText = dados.nome || "Selecionar Linha";
+      document.getElementById('infUsername').innerText = dados.username || "";
+      
+      const btnInsta = document.getElementById('btnInsta');
+      if (dados.url) {
+        btnInsta.href = dados.url;
+        btnInsta.style.display = "inline-flex";
+      } else {
+        btnInsta.style.display = "none";
+      }
+
+      const statusBadge = document.getElementById('infStatus');
+      statusBadge.innerText = "Status: " + (dados.statusAtual || "Em branco");
+    }
+
+    function navegar(direcao) {
+      limparTemporizador();
+      mostrarLoading(true);
+      google.script.run.withSuccessHandler(function(dados) {
+        exibirDadosInfluenciador(dados);
+        mostrarLoading(false);
+      }).navegarParaLinha(linhaAtual, direcao);
+    }
+
+    function buscarPendente() {
+      limparTemporizador();
+      mostrarLoading(true);
+      google.script.run.withSuccessHandler(function(dados) {
+        exibirDadosInfluenciador(dados);
+        mostrarLoading(false);
+      }).buscarProximoPendente(linhaAtual);
+    }
+
+    function executarBusca() {
+      limparTemporizador();
+      const termo = document.getElementById('inpBusca').value.trim();
+      if (!termo) return;
+      mostrarLoading(true);
+      google.script.run.withSuccessHandler(function(dados) {
+        exibirDadosInfluenciador(dados);
+        document.getElementById('inpBusca').value = "";
+        mostrarLoading(false);
+      }).buscarEAtivarInfluenciador(termo);
+    }
+
+    function tratarKeyPress(e) {
+      if (e.key === 'Enter') executarBusca();
+    }
+  </script>
+</body>
+</html>
